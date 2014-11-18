@@ -1,0 +1,48 @@
+<html>
+<header>my integeration with my service</header>
+<script src= "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<form method= "post" action="/options/something" ajax="true">
+
+
+
+
+	<span>
+	<label>Input: </label>
+	<input id="test1" type="text" name="html" placeholder="Enter data here" />
+	</span>
+	<span>
+		<input type="submit" value="Submit" />
+	</span>
+	<br/>
+	<span id="result">
+		<label>Result: </label>
+		
+	</span>
+	
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(e) {
+	
+	$("form[ajax=true]").submit(function(e){
+		
+		e.preventDefault();
+		var form_data = $("#test1").val();
+		console.log(form_data);
+		var form_url = $(this).attr("action");
+		$.ajax({
+			url: form_url,
+			type: "POST",
+			cache: false,
+			data: form_data,
+			contentType: "application/json: charset-utf-8",
+			success: function(returnhtml){
+				$("#result").html(returnhtml.message);
+			}
+		});
+	});
+	
+});
+
+</script>
+</html>
