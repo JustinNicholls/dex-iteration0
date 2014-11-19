@@ -128,9 +128,43 @@ app.post('/content', function(res, req){
 			
 		}); //end of get_contest_duration 
 		
+		//get winner_selection_duration 
+		var get_winner_selection_duration = schedule.scheduleJob(start_time, function(){
+			console.log("Getting winner selection duration at: " + start_time); 
+			
+			var get_winner_selection_duration_options={
+				host: 'developer.kb.dexit.co',
+				port: 80,
+				path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(winner_selection_duration_query), //encode query 
+				method: 'GET',
+				headers: { 
+					'Authorization' : 'Bearer '+ tokenString,
+					'Accept' : 'application/json',
+					'Name' : 'Value'
+				}
+			};  
+			
+			//http request 
+			req = http.request(get_winner_selection_duration_options,function(res){
+				//encode in utf8 
+				res.setEncoding('utf8');
+			
+				res.on('data',function(res2){
+					var winner_selection_duration_message = JSON.parse(res2);
+					console.log("Winner Selection Duration = " + winner_selection_duration_message.result.rows[0][0]); //get the winner selection duration from the query 
+					winner_selection_duration = winner_selection_duration_message.result.rows[0][0];
+				});
+			});
+		
+		//end request 	
+		req.end();			
+			
+		}); //end of get_winner_selection_duration 
+		
+
 		
 		
-	}); 
+	}); //end of content post 
 
 
 app.use('/client', express.static('public'));
