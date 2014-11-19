@@ -74,6 +74,7 @@ function content_playlist(res,req){
 //content_playlist(); 
 
 //query list: 
+//global variables for queries 
 var start_query = "UPDATE contest_sc_intelligence SET current_msg=(SELECT starting_msg FROM contest_configuration), game_state = 'started'";
 var end_query = "UPDATE contest_sc_intelligence SET current_msg=(SELECT final_msg FROM contest_configuration), game_state = 'final'";
 var choose_winner_query= "UPDATE contest_sc_intelligence SET game_state = 'winner'";
@@ -82,6 +83,7 @@ var winner_selection_duration_query = "SELECT winner_selection_duration FROM con
 
 //start the content 
 app.post('/content', function(res, req){
+		//variables 
 		var datastore = res.body.datastore; //get datastore 
 		var contest_duration; //contest duration time that will be retrieved from database
 		var winner_selection_duration; //winner_selection_duration that will be retrieved from database 
@@ -93,78 +95,183 @@ app.post('/content', function(res, req){
 		var hours = 15;
 		var minutes = 30;
 		start_time.setHours(hours);
-		start_time.setMinutes(minutes);
+		start_time.setMinutes(minutes); 
+		
+		//start the contest at start_time
+		var start_contest = schedule.scheduleJob(start_time, function(){
+			console.log("Contest will start at: " + start_time);
 
-		//get contest_duration 
-		var get_contest_duration = schedule.scheduleJob(start_time, function(){
-			console.log("Getting contest duration at: " + start_time); 
-			
-			var get_contest_duration_options={
+			var start_message_options = {
 				host: 'developer.kb.dexit.co',
 				port: 80,
-				path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(contest_duration_query), //encode query 
+				path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(start_query), //encoding query 
 				method: 'GET',
 				headers: { 
-					'Authorization' : 'Bearer '+ tokenString,
+					'Authorization' : 'Bearer '+ accessTokenString,
 					'Accept' : 'application/json',
 					'Name' : 'Value'
 				}
-			};  
+			};
 			
-			//http request 
-			req = http.request(get_contest_duration_options,function(res){
-				//encode in utf8 
+			//send http request with options	
+			req = http.request(start_message_options,function(res){
 				res.setEncoding('utf8');
-			
+				
 				res.on('data',function(res2){
-					var contest_duration_message = JSON.parse(res2);
-					console.log("Contest Duration = " + contest_duration_message.result.rows[0][0]); //get the contest duration from the query 
-					contest_duration = contest_duration_message.result.rows[0][0];
+					
 				});
 			});
-		
-		//end request 	
-		req.end();			
+			//trigger event 
+			content_playlist();
+			//end request 
+			req.end();
 			
-		}); //end of get_contest_duration 
-		
-		//get winner_selection_duration 
-		var get_winner_selection_duration = schedule.scheduleJob(start_time, function(){
-			console.log("Getting winner selection duration at: " + start_time); 
 			
-			var get_winner_selection_duration_options={
-				host: 'developer.kb.dexit.co',
-				port: 80,
-				path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(winner_selection_duration_query), //encode query 
-				method: 'GET',
-				headers: { 
-					'Authorization' : 'Bearer '+ tokenString,
-					'Accept' : 'application/json',
-					'Name' : 'Value'
-				}
-			};  
+			//get contest_duration at start_time 
+			var get_contest_duration = schedule.scheduleJob(start_time, function(){
+				console.log("Getting contest duration at: " + start_time); 
 			
-			//http request 
-			req = http.request(get_winner_selection_duration_options,function(res){
-				//encode in utf8 
-				res.setEncoding('utf8');
+				var get_contest_duration_options={
+					host: 'developer.kb.dexit.co',
+					port: 80,
+					path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(contest_duration_query), //encode query 
+					method: 'GET',
+					headers: { 
+						'Authorization' : 'Bearer '+ accessTokenString,
+						'Accept' : 'application/json',
+						'Name' : 'Value'
+					}
+				};  
 			
-				res.on('data',function(res2){
-					var winner_selection_duration_message = JSON.parse(res2);
-					console.log("Winner Selection Duration = " + winner_selection_duration_message.result.rows[0][0]); //get the winner selection duration from the query 
-					winner_selection_duration = winner_selection_duration_message.result.rows[0][0];
+				//http request 
+				req = http.request(get_contest_duration_options,function(res){
+					//encode in utf8 
+					res.setEncoding('utf8');
+			
+					res.on('data',function(res2){
+						var contest_duration_message = JSON.parse(res2);
+						console.log("Contest Duration = " + contest_duration_message.result.rows[0][0]); //get the contest duration from the query 
+						contest_duration = contest_duration_message.result.rows[0][0];
+					});
 				});
-			});
 		
-		//end request 	
-		req.end();			
+			//end request 	
+			req.end();			
 			
-		}); //end of get_winner_selection_duration 
+			}); //end of get_contest_duration
+			
+			
+			//new time object to set the time when the contest will end 
+			var end_time = start_time; 
+			end_time.setMinutes((parseInt(minutes)+parseInt(contest_duration)));
+			
+			
+			//end the contest 
+			var end_contest = schedule.scheduleJob(end_time, function(){
+				console.log("Contest will end at: " + end_time);
+				
+				var end_contest_options= {
+					host: 'developer.kb.dexit.co',
+					port: 80,
+					path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(end_query), //encode query 
+					method: 'GET',
+					headers: { 
+						'Authorization' : 'Bearer '+ accessTokenString,
+						'Accept' : 'application/json',
+						'Name' : 'Value'
+					}
+				};
+				
+				//send http request with options 	
+				req = http.request(end_contest_options,function(res){
+					res.setEncoding('utf8'); //encode in utf8 
+					
+					res.on('data',function(res2){
+						console.log("Contest has ended"); 
+					});
+				});
+				//trigger content playlist event 
+				content_playlist();
+				
+				//end request 
+				req.end(); 
+				
+				//get winner_selection_duration at end_time 
+				var get_winner_selection_duration = schedule.scheduleJob(end_time, function(){
+				console.log("Getting winner selection duration at: " + end_time); 
+			
+				var get_winner_selection_duration_options={
+					host: 'developer.kb.dexit.co',
+					port: 80,
+					path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(winner_selection_duration_query), //encode query 
+					method: 'GET',
+					headers: { 
+						'Authorization' : 'Bearer '+ accessTokenString,
+						'Accept' : 'application/json',
+						'Name' : 'Value'
+					}
+				};  
+			
+				//http request 
+				req = http.request(get_winner_selection_duration_options,function(res){
+					//encode in utf8 
+					res.setEncoding('utf8');
+			
+					res.on('data',function(res2){
+						var winner_selection_duration_message = JSON.parse(res2);
+						console.log("Winner Selection Duration = " + winner_selection_duration_message.result.rows[0][0]); //get the winner selection duration from the query 
+						winner_selection_duration = winner_selection_duration_message.result.rows[0][0];
+					});
+				});
+				//trigger event 
+				content_playlist(); 
 		
-
+				//end request 	
+				req.end();			
+			
+				}); //end of get_winner_selection_duration 
+					
+				
+				//new time object to set the time to select winner 
+				var choose_winner_time = start_time; 
+				choose_winner_time.setMinutes(parseInt(minutes)+parseInt(contest_duration)+parseInt(winner_selection_duration)); //NOTE 
+				
+				//choose winner 				
+				var choose_winner = schedule.scheduleJob(choose_winner_time, function(){
+					console.log("Contest will choose winner at: " + choose_winner_time);
+					
+					//choose winner message options 
+					var choose_winner_options = {
+						host: 'developer.kb.dexit.co',
+						port: 80,
+						path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(choose_winner_query), //encode query 
+						method: 'GET',
+						headers: { 
+							'Authorization' : 'Bearer '+ accessTokenString,
+							'Accept' : 'application/json',
+							'Name' : 'Value'
+						}
+					};
+					
+					//http request for choose winner 	
+					req = http.request(choose_winner_options,function(res){
+						res.setEncoding('utf8'); //encode in utf8 
+						
+						res.on('data',function(res2){
+							//Nothing need be done here
+						});
+					});
+					//content playlist trigger 
+					content_playlist();
+					
+					//end the request 
+					req.end();
+				}); //choose_winner ends here 
+			
+			}); //end_contest ends here
+		}); //start_contest ends here 
 		
-		
-	}); //end of content post 
+}); //end of content post 
 
 
 app.use('/client', express.static('public'));
