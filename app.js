@@ -80,6 +80,7 @@ var end_query = "UPDATE contest_sc_intelligence SET current_msg=(SELECT final_ms
 var choose_winner_query= "UPDATE contest_sc_intelligence SET game_state = 'winner'";
 var contest_duration_query = "SELECT contest_duration FROM contest_configuration";
 var winner_selection_duration_query = "SELECT winner_selection_duration FROM contest_configuration";
+var pick_winner_query = "UPDATE contest_sc_intelligence SET winner=(SELECT name FROM finalist ORDER BY score DESC LIMIT 1), game_state = 'not_started'";
 
 //start the content 
 app.post('/content', function(res, req){
@@ -274,6 +275,45 @@ app.post('/content', function(res, req){
 }); //end of content post 
 
 
+//pick_winner method 
+app.post('/winner', function(res, req){
+	var datastore = res.body.datastore;
+	var winner = "";
+	
+	var pick_winner_options = {
+			host: 'developer.kb.dexit.co',
+			port: 80,
+			path: '/access/stores/'+datastore+'/query/?query='+encodeURIComponent(pick_winner_query),
+			method: 'GET',
+			headers: { 
+				'Authorization' : 'Bearer '+ accessTokenString,
+				'Accept' : 'application/json',
+				'Name' : 'Value'
+			}
+	};
+		
+	req = http.request(pick_winner_options,function(res){
+		//encode in utf8
+		res.setEncoding('utf8');
+			
+		res.on('data',function(res2){
+			var pick_winner_message = JSON.parse(theRet);
+			console.log("Winner is: " + pick_winner_message.result.rows[0][0]); 
+			winner = pick_winner_message.result.rows[0][0];			
+		});
+	});
+	//end the request 
+	req.end();
+		
+
+	//trigger the event 
+	contentPlaylist();
+		
+});
+
+
+
+//
 app.use('/client', express.static('public'));
 
 ////////////
