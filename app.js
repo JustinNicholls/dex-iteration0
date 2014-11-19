@@ -109,8 +109,7 @@ app.post('/content', function(res, req){
 				method: 'GET',
 				headers: { 
 					'Authorization' : 'Bearer '+ accessTokenString,
-					'Accept' : 'application/json',
-					'Name' : 'Value'
+					'Accept' : 'application/json'
 				}
 			};
 			
@@ -139,8 +138,7 @@ app.post('/content', function(res, req){
 					method: 'GET',
 					headers: { 
 						'Authorization' : 'Bearer '+ accessTokenString,
-						'Accept' : 'application/json',
-						'Name' : 'Value'
+						'Accept' : 'application/json'
 					}
 				};  
 			
@@ -178,8 +176,7 @@ app.post('/content', function(res, req){
 					method: 'GET',
 					headers: { 
 						'Authorization' : 'Bearer '+ accessTokenString,
-						'Accept' : 'application/json',
-						'Name' : 'Value'
+						'Accept' : 'application/json'
 					}
 				};
 				
@@ -208,8 +205,7 @@ app.post('/content', function(res, req){
 					method: 'GET',
 					headers: { 
 						'Authorization' : 'Bearer '+ accessTokenString,
-						'Accept' : 'application/json',
-						'Name' : 'Value'
+						'Accept' : 'application/json'
 					}
 				};  
 			
@@ -249,8 +245,7 @@ app.post('/content', function(res, req){
 						method: 'GET',
 						headers: { 
 							'Authorization' : 'Bearer '+ accessTokenString,
-							'Accept' : 'application/json',
-							'Name' : 'Value'
+							'Accept' : 'application/json'
 						}
 					};
 					
@@ -287,8 +282,7 @@ app.post('/winner', function(res, req){
 			method: 'GET',
 			headers: { 
 				'Authorization' : 'Bearer '+ accessTokenString,
-				'Accept' : 'application/json',
-				'Name' : 'Value'
+				'Accept' : 'application/json'
 			}
 	};
 		
