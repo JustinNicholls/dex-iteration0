@@ -37,13 +37,38 @@ app.get('/users', user.list);
 
 
 //access token here 
-var alex = new accesstoken(); 
-var tokenString =""; 
+var access = new accesstoken(); 
+var accessTokenString =""; 
 
-alex.authenticate("cfung58@uwo.ca", "Beaufighter_1", "activesight", function(err, token){
-	console.log(token); 
-	tokenString = token; 
+access.authenticate("cfung58@uwo.ca", "Beaufighter_1", "activesight", function(err, token){
+	console.log("Token: " , token); 
+	accessTokenString = token; 
 }); 
+
+//event trigger 
+function content_playlist(res, req){
+	var trigger ={
+		host:'developer.kb.dexit.co', 
+		port: 80, 
+		path: '/events/bb0f3a80-bcb2-4387-b339-3439554ce0f1/trigger',
+		method:'POST', 
+		headers: {
+			'X-Auth-KeyString': accessTokenString
+		}
+	}; 
+	req = http.request(trigger, function(res){
+		res.setEncoding('utf-8'); 
+
+		res.on('data', function(res2){
+			console.log("Content playlist trigger"); 
+		}); 
+	}); 
+
+	req.end(); 
+
+}
+
+content_playlist(); 
 
 
 

@@ -1,1 +1,1 @@
-web: node fuckingtoken.js
+web: node app.js

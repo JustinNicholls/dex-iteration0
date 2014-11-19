@@ -3,15 +3,14 @@
  * Module dependencies.
  */
 
-
-
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
   , param = require('./routes/quer_parameter')
-  , accesstoken= require('./routes/accessToken');
+  , accesstoken= require('./routes/accessToken')
+  , node_schedule = require ('node-schedule'); 
 var app = express();
 
 // all environments
@@ -37,29 +36,19 @@ app.get('/users', user.list);
 
 
 //access token here 
-var alex = new accesstoken(); 
-var tokenString =""; 
+var access = new accesstoken(); 
+var accessTokenString =""; 
 
-alex.authenticate("cfung58@uwo.ca", "Beaufighter_1", "activesight", function(err, token){
-	console.log("piece of shit: " , token); 
-	tokenString = token; 
+//calls authenticate function from routes/accessToken.js 
+access.authenticate("cfung58@uwo.ca", "Beaufighter_1", "activesight", function(err, token){
+	 accessTokenString = token; 
+	 console.log("Token: " , token);
 }); 
-
-
-
-/////////////////////
-app.post('/', routes.index);
-app.post('/options/:id', param.post_quaryParameter);
-app.post('/', param.put);
-//app.post('/winner', param.pick_winner); 
-
-////////////////////
-
-/////////////////////
 
 app.use('/client', express.static('public'));
 
-////////////////////
+////////////
+
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
