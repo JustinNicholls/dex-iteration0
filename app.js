@@ -10,7 +10,7 @@ var express = require('express')
   , path = require('path')
   , param = require('./routes/quer_parameter')
   , accesstoken= require('./routes/accessToken')
-  , node_schedule = require ('node-schedule'); 
+  , schedule = require ('node-schedule'); 
 var app = express();
 
 // all environments
@@ -93,8 +93,8 @@ app.post('/content', function(res, req){
 		//create new time that will be the time needed to schedule the start 
 		var start_time = new Date();
 		//set hour and minutes here 
-		var hours = 15;
-		var minutes = 30;
+		var hours = 21;
+		var minutes = 02;
 		start_time.setHours(hours);
 		start_time.setMinutes(minutes); 
 		
@@ -126,9 +126,13 @@ app.post('/content', function(res, req){
 			//end request 
 			req.end();
 			
-			
+			var get_contest_duration;
+
+			start_time.setHours(21);
+			start_time.setMinutes(03); 
 			//get contest_duration at start_time 
-			var get_contest_duration = schedule.scheduleJob(start_time, function(){
+			get_contest_duration = schedule.scheduleJob(start_time, function(){
+
 				console.log("Getting contest duration at: " + start_time); 
 			
 				var get_contest_duration_options={
