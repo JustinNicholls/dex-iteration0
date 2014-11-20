@@ -1,4 +1,4 @@
-
+var testduration;
 /**
  * Module dependencies.
  */
@@ -127,13 +127,14 @@ app.post('/content', function(res, req){
 			req.end();
 			
 			var get_contest_duration;
-
-			start_time.setHours(21);
-			start_time.setMinutes(03); 
+			
+			var newtime = new Date();
+			newtime.setHours(hours);
+			newtime.setMinutes(minutes+1); 
 			//get contest_duration at start_time 
-			get_contest_duration = schedule.scheduleJob(start_time, function(){
+			get_contest_duration = schedule.scheduleJob(newtime, function(){
 
-				console.log("Getting contest duration at: " + start_time); 
+				console.log("Getting contest duration at: " + newtime); 
 			
 				var get_contest_duration_options={
 					host: 'developer.kb.dexit.co',
@@ -154,10 +155,11 @@ app.post('/content', function(res, req){
 					res.on('data',function(res2){
 						var contest_duration_message = JSON.parse(res2);
 						console.log("Contest Duration = " + contest_duration_message.result.rows[0][0]); //get the contest duration from the query 
-						contest_duration = contest_duration_message.result.rows[0][0];
+						contest_duration = contest_duration_message.result.rows[0][0]; 
+						testduration = parseInt(contest_duration_message.result.rows[0][0]);
 					});
 				});
-		
+				//testduration = parseInt(req.contest_duration);
 			//end request 	
 			req.end();			
 			
@@ -165,10 +167,13 @@ app.post('/content', function(res, req){
 			
 			
 			//new time object to set the time when the contest will end 
-			var end_time = start_time; 
-			end_time.setMinutes((parseInt(minutes)+parseInt(contest_duration)));
-			
-			
+			//var end_time = start_time; 
+			//end_time.setMinutes((parseInt(minutes)+parseInt(contest_duration)));
+			console.log(testduration);
+			var end_time= new Date();
+			end_time.setHours(hours);
+			end_time.setMinutes(parseInt(minutes)+testduration); 
+			//console.log(end_time);
 			//end the contest 
 			var end_contest = schedule.scheduleJob(end_time, function(){
 				console.log("Contest will end at: " + end_time);
@@ -295,9 +300,9 @@ app.post('/winner', function(res, req){
 		res.setEncoding('utf8');
 			
 		res.on('data',function(res2){
-			var pick_winner_message = JSON.parse(theRet);
-			console.log("Winner is: " + pick_winner_message.result.rows[0][0]); 
-			winner = pick_winner_message.result.rows[0][0];			
+			var pick_winner_message = JSON.parse(res2);
+			console.log("Winner is: " + pick_winner_message.result.rows[0][3]); 
+			winner = pick_winner_message.result.rows[0][3];			
 		});
 	});
 	//end the request 
@@ -305,7 +310,7 @@ app.post('/winner', function(res, req){
 		
 
 	//trigger the event 
-	contentPlaylist();
+	content_playlist();
 		
 });
 
