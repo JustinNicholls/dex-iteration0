@@ -66,7 +66,9 @@ function content_playlist(res,req){
 			path: '/events/bb0f3a80-bcb2-4387-b339-3439554ce0f1/trigger',
 			method: 'POST',
 			headers: { 
-				'X-Auth-Key' : '0d10e238-cc33-4d29-b842-a6a6e9ac9531'
+				'X-Auth-Key' : '0d10e238-cc33-4d29-b842-a6a6e9ac9531', 
+				'Content-Type':'application/json', 
+				'Content-Length': 0
 			}
 		};
 		
@@ -86,7 +88,7 @@ function content_playlist(res,req){
 
 
 //testing the contentplaylist function 
-//content_playlist(); 
+content_playlist(); 
 
 
 //start the content 
@@ -161,8 +163,8 @@ app.post('/content', function(res, req){
 		//create new time that will be the time needed to schedule the start 
 		var start_time = new Date();
 		//set hour and minutes here 
-		var hours = 16;
-		var minutes = 51;
+		var hours = 17;
+		var minutes = 15;
 		start_time.setHours(hours);
 		start_time.setMinutes(minutes); 
 		
